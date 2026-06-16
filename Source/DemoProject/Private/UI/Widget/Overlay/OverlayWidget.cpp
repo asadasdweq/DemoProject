@@ -33,7 +33,8 @@ void UOverlayWidget::WidgetControllerSet()
 	SpellGlobe_3->SetWidgetController(WidgetController);
 
 	UOverlayWidgetController*OverlayWidgetController=Cast<UOverlayWidgetController>(WidgetController);
-	OverlayWidgetController->GetDemoASC()->AbilitiesGivenDelegate.Broadcast();
+
+	OverlayWidgetController->BroadAbilityInfo();
 	
 	
 }

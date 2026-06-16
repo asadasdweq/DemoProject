@@ -211,12 +211,3 @@ void ADemoPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	
 	if (GetAsc()) GetAsc()->AbilityInputTagHeld(InputTag);
 }
-
-void ADemoPlayerController::AutoRun()
-{
-	if (!bAutoRunning) return;
-	if (APawn*ControlledPawn=GetPawn())
-	{
-		
-	}
-}

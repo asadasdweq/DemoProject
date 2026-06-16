@@ -17,16 +17,6 @@ class UDemoInputConfig;
 class UInputAction;
 class UInputMappingContext;
 struct FInputActionValue;
-/**
- * 
- */
-
-enum class ETargetingStatus :uint8
-{
-	TargetingEnemy,
-	TargetingNonEnemy,
-	NotTargeting
-};
 UCLASS()
 class DEMOPROJECT_API ADemoPlayerController : public APlayerController
 {
@@ -86,17 +76,10 @@ private:
 	void ShiftKeyPressed(){bShiftKeyDown=true;};
 	void ShiftKeyReleased(){bShiftKeyDown=false;};
 	bool bShiftKeyDown = false;
-
-	FVector CachedDestination=FVector::ZeroVector;
-	float FollowTime = 0.f;
-	float ShortPressThreshold = 0.5f;
-	bool bAutoRunning = false;
-	void AutoRun();
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent>DamageTextComponentClass;
 	
-	ETargetingStatus TargetingStatus = ETargetingStatus::NotTargeting;
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UNiagaraSystem>ClickedNiagaraSystem;
 	UPROPERTY(VisibleAnywhere)

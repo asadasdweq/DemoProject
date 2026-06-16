@@ -21,6 +21,9 @@ ADemoCharacterBase::ADemoCharacterBase()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), FName("WeaponHandSocket"));
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	CombatSocketComponent = CreateDefaultSubobject<USceneComponent>("CombatSocketComponent");
+	CombatSocketComponent->SetupAttachment(Weapon);
 	
 	
 	
@@ -121,6 +124,11 @@ UNiagaraSystem* ADemoCharacterBase::GetBloodEffect_Implementation()
 
 USceneComponent* ADemoCharacterBase::GetWeapon_Implementation()
 {
+	UpdateCombatSocketComponentAttachment();
+	if (CombatSocketComponent)
+	{
+		return CombatSocketComponent;
+	}
 	if (bHasWeapon) return Weapon;
 	return GetMesh();
 }
@@ -180,6 +188,7 @@ void ADemoCharacterBase::InitializeDefaultAttributes() const
 void ADemoCharacterBase::SetHasWeapon(bool HasWeapon)
 {
 	bHasWeapon=HasWeapon;
+	UpdateCombatSocketComponentAttachment();
 }
 
 void ADemoCharacterBase::SetWeapon(AActor* Actor)
@@ -192,7 +201,41 @@ void ADemoCharacterBase::SetWeapon(AActor* Actor)
 	if (WeaponSkeletalMesh)
 	{
 		Weapon=WeaponSkeletalMesh;
+		UpdateCombatSocketComponentAttachment();
 	}
+}
+
+void ADemoCharacterBase::UpdateCombatSocketComponentAttachment()
+{
+	if (!CombatSocketComponent)
+	{
+		return;
+	}
+
+	USceneComponent* AttachParent = nullptr;
+	FName AttachSocket = NAME_None;
+
+	if (bHasWeapon && IsValid(Weapon) && WeaponSocketName != NAME_None && Weapon->DoesSocketExist(WeaponSocketName))
+	{
+		AttachParent = Weapon;
+		AttachSocket = WeaponSocketName;
+	}
+	else if (USkeletalMeshComponent* CharacterMesh = GetMesh())
+	{
+		AttachParent = CharacterMesh;
+		if (HandSocketName != NAME_None && CharacterMesh->DoesSocketExist(HandSocketName))
+		{
+			AttachSocket = HandSocketName;
+		}
+	}
+
+	if (!AttachParent)
+	{
+		CombatSocketComponent->SetWorldLocation(GetActorLocation());
+		return;
+	}
+
+	CombatSocketComponent->AttachToComponent(AttachParent, FAttachmentTransformRules::SnapToTargetNotIncludingScale, AttachSocket);
 }
 
 void ADemoCharacterBase::AddCharacterAbilities() 

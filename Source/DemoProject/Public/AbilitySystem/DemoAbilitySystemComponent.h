@@ -15,7 +15,6 @@ class DEMOPROJECT_API UDemoAbilitySystemComponent : public UAbilitySystemCompone
 {
 	GENERATED_BODY()
 public:
-	void AbilityActorInfoSet();
 	void AbilityInputTagPressed(const FGameplayTag& InputTag);
 	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
@@ -30,6 +29,5 @@ public:
 	
 protected:
 	virtual void OnRep_ActivateAbilities() override;
-	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
 	bool IsAbilityInputBlocked(const FGameplayAbilitySpec& AbilitySpec) const;
 };

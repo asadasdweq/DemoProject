@@ -229,12 +229,18 @@ void UInventoryComponent::Multicast_EquipSlotClicked_Implementation(UInv_Invento
 
 void UInventoryComponent::Server_DropItem_Implementation(UInv_InventoryItem* Item, int32 StackCount)
 {
-	if (!IsValid(Item) || StackCount <= 0)
+	if (!IsValid(Item))
 	{
 		return;
 	}
 
-	StackCount = FMath::Min(StackCount, Item->GetStackCount());
+	const bool bStackable = Item->IsStackable();
+	if (bStackable && StackCount <= 0)
+	{
+		return;
+	}
+
+	StackCount = bStackable ? FMath::Min(StackCount, Item->GetStackCount()) : 1;
 	const int32 NewStackCount=Item->GetStackCount()-StackCount;
 	if (NewStackCount<=0)
 	{

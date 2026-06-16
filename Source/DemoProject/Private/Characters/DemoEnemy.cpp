@@ -52,7 +52,6 @@ void ADemoEnemy::InitActorAbilityInfo()
 {
 	Super::InitActorAbilityInfo();
 	GetAbilitySystemComponent()->InitAbilityActorInfo(this,this);
-	Cast<UDemoAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 	if (HasAuthority())
 	{
 		InitializeDefaultAttributes();

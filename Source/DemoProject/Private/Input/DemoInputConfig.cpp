@@ -13,7 +13,7 @@ const UInputAction* UDemoInputConfig::FindAbilityInputActionForTag(const FGamepl
 		}
 		if (bNotFound)
 		{
-			UE_LOG(LogTemp,Error,TEXT("Cant't find input action for tag %s"),*Tag.ToString());
+			UE_LOG(LogTemp, Error, TEXT("Can't find input action for tag %s"), *Tag.ToString());
 		}
 	}
 	return nullptr;

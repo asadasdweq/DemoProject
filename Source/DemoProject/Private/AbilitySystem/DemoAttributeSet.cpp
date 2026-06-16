@@ -67,12 +67,6 @@ void UDemoAttributeSet::PostGameplayEffectExecute(const  FGameplayEffectModCallb
 	}
 }
 
-void UDemoAttributeSet::PostAttributeBaseChange(const FGameplayAttribute& Attribute, float OldValue,
-	float NewValue) const
-{
-	Super::PostAttributeBaseChange(Attribute, OldValue, NewValue);
-}
-
 void UDemoAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UDemoAttributeSet,Health,OldHealth);

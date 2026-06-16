@@ -5,11 +5,6 @@
 #include "AbilitySystem/Abilities/DemoGameplayAbility.h"
 #include "DemoGameplayTags.h"
 
-void UDemoAbilitySystemComponent::AbilityActorInfoSet()
-{
-	OnGameplayEffectAppliedDelegateToSelf.AddUObject(this,&UDemoAbilitySystemComponent::EffectApplied);
-}
-
 void UDemoAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
 {
 	if (!InputTag.IsValid())return;
@@ -118,7 +113,7 @@ void UDemoAbilitySystemComponent::ForEachAbility(const FForEachAbility& Delegate
 	{
 		if (!Delegate.ExecuteIfBound(AbilitySpec))
 		{
-			UE_LOG(LogTemp,Error,TEXT("没有与之绑定的函数%hs"),__FUNCTION__);
+			UE_LOG(LogTemp, Error, TEXT("No bound delegate function in %hs"), __FUNCTION__);
 		}
 	}
 }
@@ -174,10 +169,4 @@ bool UDemoAbilitySystemComponent::IsAbilityInputBlocked(const FGameplayAbilitySp
 		AbilitySpec.IsActive() && Ability && Ability->HasActivationOwnedTag(AbilityInputBlockedTag);
 
 	return !bAllowCurrentBlockingAbilityInput;
-}
-
-void UDemoAbilitySystemComponent::EffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
-	const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle)
-{
-	
 }

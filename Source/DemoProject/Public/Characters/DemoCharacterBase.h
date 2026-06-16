@@ -12,6 +12,7 @@ class UGameplayEffect;
 class UAbilitySystemComponent;
 class UAttributeSet;
 class UGameplayAbility;
+class USceneComponent;
 UCLASS()
 class DEMOPROJECT_API ADemoCharacterBase : public ACharacter,public IAbilitySystemInterface,public ICombatInterface
 {
@@ -64,6 +65,8 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	TObjectPtr<USkeletalMeshComponent>Weapon;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	TObjectPtr<USceneComponent> CombatSocketComponent;
 	UPROPERTY(Replicated, BlueprintReadOnly, Category="Combat")
 	bool bHasWeapon=false;
 	
@@ -113,6 +116,7 @@ protected:
 	FName HandSocketName;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat")
 	float MaxWeaponSocketDistanceFromHand = 500.f;
+	void UpdateCombatSocketComponentAttachment();
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Abilities")

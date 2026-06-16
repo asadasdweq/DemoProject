@@ -162,7 +162,6 @@ void ADemoCharacter::InitActorAbilityInfo()
 	ADemoPlayerState*DemoPlayerState=GetPlayerState<ADemoPlayerState>();
 	check(DemoPlayerState);
 	DemoPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(DemoPlayerState,this);
-	Cast<UDemoAbilitySystemComponent>(DemoPlayerState->GetAbilitySystemComponent())->AbilityActorInfoSet();
 	AbilitySystemComponent=DemoPlayerState->GetAbilitySystemComponent();
 	AttributeSet=DemoPlayerState->GetAttributeSet();
 	

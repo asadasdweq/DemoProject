@@ -4,6 +4,7 @@
 #include "Actors/DemoRollingStone.h"
 #include "AbilitySystemComponent.h"
 #include "Components/AudioComponent.h"
+#include "DemoAbilityTypes.h"
 #include "DemoGameplayTags.h"
 #include "DemoProject/DemoProject.h"
 #include "Engine/World.h"
@@ -12,19 +13,6 @@
 #include "Interaction/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
-
-namespace
-{
-	void EncodeChargePercentIntoHitResult(FHitResult& HitResult, const float ChargePercent)
-	{
-		HitResult.TraceStart.X = FMath::Clamp(ChargePercent, 0.f, 1.f) * 1000.f;
-	}
-
-	float DecodeChargePercentFromHitResult(const FHitResult& HitResult)
-	{
-		return FMath::Clamp(static_cast<float>(HitResult.TraceStart.X) / 1000.f, 0.f, 1.f);
-	}
-}
 
 UDemoChargeRockAbility::UDemoChargeRockAbility()
 {
@@ -202,9 +190,6 @@ void UDemoChargeRockAbility::SpawnPreviewStone()
 		PreviewStone->SetReplicates(false);
 		PreviewStone->SetReplicateMovement(false);
 		PreviewStone->SetActorEnableCollision(false);
-		PreviewStone->DamageGameplayEffectClass = DamageGameplayEffectClass;
-		PreviewStone->DamageType = DamageType.IsValid() ? DamageType : FDemoGameplayTags::Get().Attributes_Secondary_PhysicalDamage;
-		PreviewStone->BaseDamage = MinBaseDamage.GetValueAtLevel(GetAbilityLevel());
 		PreviewStone->SetOwner(AvatarActor);
 		PreviewStone->SetInstigator(Cast<APawn>(AvatarActor));
 		PreviewStone->bSpawnDestroyEffect = false;
@@ -286,20 +271,21 @@ void UDemoChargeRockAbility::SendMouseTargetData()
 	FScopedPredictionWindow ScopedPrediction(CurrentActorInfo->AbilitySystemComponent.Get());
 	FGameplayAbilityTargetDataHandle DataHandle;
 
+	FVector TargetLocation = GetMouseTargetLocation();
 	FHitResult CursorHit;
 	if (APlayerController* PlayerController = CurrentActorInfo->PlayerController.Get())
 	{
 		PlayerController->GetHitResultUnderCursor(ECC_Target, false, CursorHit);
 	}
-	if (!CursorHit.bBlockingHit)
+	if (CursorHit.bBlockingHit)
 	{
-		CursorHit.Location = GetMouseTargetLocation();
-		CursorHit.ImpactPoint = CursorHit.Location;
+		TargetLocation = CursorHit.ImpactPoint;
 	}
-	EncodeChargePercentIntoHitResult(CursorHit, GetChargePercent());
 
-	FGameplayAbilityTargetData_SingleTargetHit* TargetData = new FGameplayAbilityTargetData_SingleTargetHit();
-	TargetData->HitResult = CursorHit;
+	const float ChargePercent = GetChargePercent();
+	FGameplayAbilityTargetData_ChargeRock* TargetData = new FGameplayAbilityTargetData_ChargeRock();
+	TargetData->TargetLocation = TargetLocation;
+	TargetData->ChargePercent = ChargePercent;
 	DataHandle.Add(TargetData);
 
 	CurrentActorInfo->AbilitySystemComponent->ServerSetReplicatedTargetData(
@@ -311,7 +297,7 @@ void UDemoChargeRockAbility::SendMouseTargetData()
 
 	if (GetAvatarActorFromActorInfo()->HasAuthority())
 	{
-		ReleaseStoneAtLocation(CursorHit.ImpactPoint, DecodeChargePercentFromHitResult(CursorHit));
+		ReleaseStoneAtLocation(TargetLocation, ChargePercent);
 	}
 }
 
@@ -324,13 +310,18 @@ void UDemoChargeRockAbility::OnReleaseTargetDataReady(const FGameplayAbilityTarg
 			GetCurrentActivationInfo().GetActivationPredictionKey());
 	}
 
-	const FHitResult* HitResult = DataHandle.Num() > 0 && DataHandle.Get(0) ? DataHandle.Get(0)->GetHitResult() : nullptr;
 	FVector TargetLocation = GetMouseTargetLocation();
-	if (HitResult)
+	float ReleaseChargePercent = -1.f;
+	if (DataHandle.Num() > 0)
 	{
-		TargetLocation = FVector(HitResult->ImpactPoint);
+		const FGameplayAbilityTargetData* TargetData = DataHandle.Get(0);
+		if (TargetData && TargetData->GetScriptStruct() == FGameplayAbilityTargetData_ChargeRock::StaticStruct())
+		{
+			const FGameplayAbilityTargetData_ChargeRock* ChargeRockData = static_cast<const FGameplayAbilityTargetData_ChargeRock*>(TargetData);
+			TargetLocation = ChargeRockData->TargetLocation;
+			ReleaseChargePercent = ChargeRockData->ChargePercent;
+		}
 	}
-	const float ReleaseChargePercent = HitResult ? DecodeChargePercentFromHitResult(*HitResult) : -1.f;
 	ReleaseStoneAtLocation(TargetLocation, ReleaseChargePercent);
 	EndAbility(GetCurrentAbilitySpecHandle(), GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);
 }

@@ -238,7 +238,8 @@ void UDemoInventoryGrid::DropItem()
 	if (!IsValid(HoverItem))return;
 	if (!IsValid(HoverItem->GetInventoryItem()))return;
 	
-	InventoryComponent->Server_DropItem(HoverItem->GetInventoryItem(),HoverItem->GetStackCount());
+	const int32 DropStackCount = HoverItem->IsStackable() ? HoverItem->GetStackCount() : 1;
+	InventoryComponent->Server_DropItem(HoverItem->GetInventoryItem(),DropStackCount);
 	
 	ClearHoverItem();
 	ShowCursor();
